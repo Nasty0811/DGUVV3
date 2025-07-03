@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>DGUV Management System</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script>
+    function toggleBlock(id) {
+      const panel = document.getElementById(id).parentElement;
+      panel.classList.toggle("open");
+    }
+  </script>
+</head>
+<body>
+  <header>
+    <h1>DGUV Management System</h1>
+    <div class="logout">
+      👤 {{ benutzername }} 
+      <a href="{{ url_for('logout') }}">🔓 Logout</a>     
+    </div>
+  </header>
+
+  <div class="datum">📅 Heute ist: {{ heute }}</div>
+
+  <div class="grid-container">
+
+    <!-- 🔴 Überfällig -->
+    <div class="panel">
+      <div class="panel-header" onclick="toggleBlock('rot')">🔴 Überfällig ({{ anzahl_rot }})</div>
+      <div class="panel-content" id="rot">
+        <table>
+          <thead><tr><th>ID</th><th>Gerät</th><th>Abteilung</th><th>Fällig</th></tr></thead>
+          <tbody>
+            {% for eintrag in rot %}
+            <tr><td>{{ eintrag.id }}</td><td>{{ eintrag.geraet }}</td><td>{{ eintrag.abteilung }}</td><td>{{ eintrag.naechste }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 🟡 Demnächst -->
+    <div class="panel">
+      <div class="panel-header" onclick="toggleBlock('gelb')">🟡 Demnächst ({{ anzahl_gelb }})</div>
+      <div class="panel-content" id="gelb">
+        <table>
+          <thead><tr><th>ID</th><th>Gerät</th><th>Abteilung</th><th>Fällig</th></tr></thead>
+          <tbody>
+            {% for eintrag in gelb %}
+            <tr><td>{{ eintrag.id }}</td><td>{{ eintrag.geraet }}</td><td>{{ eintrag.abteilung }}</td><td>{{ eintrag.naechste }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 🟢 Nicht fällig -->
+    <div class="panel">
+      <div class="panel-header" onclick="toggleBlock('gruen')">🟢 Nicht fällig ({{ anzahl_gruen }})</div>
+      <div class="panel-content" id="gruen">
+        <table>
+          <thead><tr><th>ID</th><th>Gerät</th><th>Abteilung</th><th>Fällig</th></tr></thead>
+          <tbody>
+            {% for eintrag in gruen %}
+            <tr><td>{{ eintrag.id }}</td><td>{{ eintrag.geraet }}</td><td>{{ eintrag.abteilung }}</td><td>{{ eintrag.naechste }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 🟣 Private Geräte -->
+    <div class="panel">
+      <div class="panel-header" onclick="toggleBlock('privat')">🟣 Private Geräte ({{ anzahl_privat }})</div>
+      <div class="panel-content" id="privat">
+        <table>
+          <thead><tr><th>ID</th><th>Gerät</th><th>Abteilung</th><th>Fällig</th></tr></thead>
+          <tbody>
+            {% for eintrag in privat %}
+            <tr>
+              <td>{{ eintrag.id }}</td>
+              <td>{{ eintrag.geraet }}</td>
+              <td>{{ eintrag.abteilung }}</td>
+              <td>{{ eintrag.naechste }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 🔍 ID-Suche -->
+    <div class="panel upload-panel">
+      <div class="panel-header" onclick="toggleBlock('id-suche')">🔍 Suche nach ID</div>
+      <div class="panel-content" id="id-suche">
+        <form id="suchForm" action="{{ url_for('suche_nach_id') }}" method="get">
+          <input id="suchfeld" type="text" name="such_id" placeholder="ID oder Abteilung eingeben" required>
+          <button type="submit">Suchen</button>
+          <button type="button" onclick="Android.starteScanner()" class="scan-button">📷 Scan</button>
+        </form>
+      </div>
+    </div>
+
+
+    <!-- 📂 Datenbank hochladen -->
+    <div class="panel upload-panel">
+      <div class="panel-header" onclick="toggleBlock('upload')">📂 Datenbank hochladen</div>
+      <div class="panel-content" id="upload">
+        <form action="{{ url_for('upload_datenbank') }}" method="post" enctype="multipart/form-data">
+          <input type="file" name="datenbank" accept=".xml" required>
+          <button type="submit">Hochladen</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 📦 Ersatzteillager (jetzt am Ende) -->
+    <div class="panel">
+      <div class="panel-header" onclick="toggleBlock('lager')">📦 Ersatzteillager</div>
+      <div class="panel-content" id="lager">
+        <table>
+          <thead><tr><th>Teil</th><th>Bestand</th><th>Typ</th><th>Aktion</th></tr></thead>
+          <tbody>
+            {% for teil in ersatzteile %}
+            <tr>
+              <td>{{ teil.teil }}</td>
+              <td>{{ teil.bestand }}</td>
+              <td>{{ teil.geraetetyp }}</td>
+              <td>
+                <form action="{{ url_for('update_lager') }}" method="POST">
+                  <input type="hidden" name="teil" value="{{ teil.teil }}">
+                  <button type="submit" name="aktion" value="+">+</button>
+                  <button type="submit" name="aktion" value="-">–</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <h3>➕ Neues Teil</h3>
+        <form action="{{ url_for('add_teil') }}" method="POST" class="form-inline">
+          <input name="new_name" placeholder="Teilname" required>
+          <input name="new_bestand" placeholder="Bestand" type="number" required>
+          <input name="new_typ" placeholder="Gerätetyp" required>
+          <button type="submit">Hinzufügen</button>
+        </form>
+      </div>
+    </div>
+
+  </div> <!-- Ende von grid-container -->
+</body>
+</html>
+

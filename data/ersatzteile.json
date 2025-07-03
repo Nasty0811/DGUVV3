@@ -1,0 +1,22 @@
+[
+  {
+    "teil": "Mehrfachsteckdose 6 Fach",
+    "bestand": 4,
+    "geraetetyp": "Verl\u00e4ngerung"
+  },
+  {
+    "teil": "Standventilator",
+    "bestand": 1,
+    "geraetetyp": "Verbraucher"
+  },
+  {
+    "teil": "Ventilator",
+    "bestand": 5,
+    "geraetetyp": "Verbraucher"
+  },
+  {
+    "teil": "Kabelwanne",
+    "bestand": 21,
+    "geraetetyp": "..."
+  }
+]
